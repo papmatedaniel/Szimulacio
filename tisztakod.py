@@ -3,10 +3,11 @@
 import random
 import os
 
+
 class Allat:
     """Állat osztály"""
 
-    def __init__(self, faj, pozicio, maxeletkor, szaporodasiido):
+    def __init__(self, faj: str, pozicio: tuple[int, int], maxeletkor: int, szaporodasiido: int) -> None:
         self.faj = faj  # Állat faja: növényevő/húsevő(ragadozó)
         self.eletkor = 0  # Állat életkora
         self.maxeletkor = maxeletkor  # Állat maximális életkora
@@ -21,7 +22,7 @@ class Allat:
 class Szimulacio:
     """Állatok mozgásának szimulációja"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.szavanna = [["." for _ in range(20)] for _ in range(20)]  # 20x20 mátrix
         self.jatekev = 0  # Aktuális játkév
         self.allatok = set()  # Állat objektumok(életkor, faj, kor) tárolása
@@ -36,7 +37,7 @@ class Szimulacio:
         )  # Újszülött ragadozók (x,y) koordinátája
         self.szabadcellak = set()  # Üres cellák koordinátája(x,y)
 
-    def cellak_frissitese(self):
+    def cellak_frissitese(self) -> None:
         """Frissíti a ragadozók, növényevők, újszülöttek celláját, +szabadcellakat"""
         self.novenyevok_cellaja = {
             i.pozicio for i in self.allatok if i.faj == "novenyevo"
@@ -59,7 +60,7 @@ class Szimulacio:
         szabadcellak = palya_osszes_cellaja - osszes_elfoglalt_cella
         self.szabadcellak = szabadcellak
 
-    def allatgeneralo(self, faj, pozicio):
+    def allatgeneralo(self, faj: str, pozicio: tuple[int, int]) -> None:
         """Legenerálja az adott állatot, és belerakja az újszülött_allatok-ba"""
         ragadozo_eletkor = random.randint(9, 12)  # Ragadozó maxéletkora 9-12 év
         novenyevo_eletkor = random.randint(11, 14)  # Növényevő maxéletkora 11-14 év
@@ -74,7 +75,7 @@ class Szimulacio:
             Allat(faj, pozicio, maxeletkor, szaporodasiido)
         )  # Újszülött létrehozása
 
-    def szavanna_frissito(self):
+    def szavanna_frissito(self) -> None:
         """Minden év végén frissítjük, és kinyomtatjuk a szavannát"""
         self.szavanna = [
             ["." for _ in range(20)] for _ in range(20)
@@ -90,7 +91,7 @@ class Szimulacio:
                     "\033[31mR\033[0m"  # Ha pedig ragadozó, akkor R-el jelöljük
                 )
 
-    def kezdeti_allatok_generalasa(self):
+    def kezdeti_allatok_generalasa(self) -> None:
         """Legeneráljuk a 0 év állatait."""
         allat_szamlalo = 0
         while allat_szamlalo != 180:  # Ez 180 állat generálásáig megy
@@ -115,29 +116,29 @@ class Szimulacio:
                 )  # Az állatokat hozzáadjuk
                 allat_szamlalo += 1  # Növeljük a hozzáadott állatok számát
 
-    def jatekev_novelo(self):
+    def jatekev_novelo(self) -> None:
         """Minden évben megnöveli 1-el a játékévet"""
         self.jatekev += 1
 
-    def ujszulott_allatok_kezelese(self):
+    def ujszulott_allatok_kezelese(self) -> None:
         """Az újszülötteketet kezeli"""
         self.allatok.update(
             self.ujszulott_allatok
         )  # Az újszülötteket hozzáadjuk az állatokhoz.
         self.ujszulott_allatok = set()  # Az újszülötteket pedig kiürítjük
 
-    def eletkornovelo(self):
+    def eletkornovelo(self) -> None:
         """Növeli az állatok életkorát"""
         for allat in self.allatok:
             allat.eletkor += 1
 
-    def ehsegnovelo(self):
+    def ehsegnovelo(self) -> None:
         """Növeli a ragadozók éhség szintjét."""
         for allat in self.allatok:
             if allat.faj == "husevo":
                 allat.ehsegszint += 1
 
-    def meghal(self):
+    def meghal(self) -> None:
         """Ha az állat elérte a maximális életkorát,
         akkor meghal, vagy ragadozónál az éhségszint eléri a 2-t"""
         meghalt = set()
@@ -146,7 +147,7 @@ class Szimulacio:
                 meghalt.add(allat)
         self.allatok = self.allatok - meghalt
 
-    def egysugarukor(self, pozicio):
+    def egysugarukor(self, pozicio: tuple[int, int]) -> set:
         """Kiszámolja a pályán belül xy pozíció mellett
         lévő cellákat, és visszadja annak listáját"""
         iranyok = {
@@ -167,7 +168,7 @@ class Szimulacio:
                 egysugaru_szabadkord.add(uj_pozicio)
         return egysugaru_szabadkord
 
-    def allatmozgato(self, pozicio):
+    def allatmozgato(self, pozicio: tuple[int, int]) -> tuple:
         """Az állat mellett visszaad egy szabad helyet, ha van,
         ellenkező esetben a saját koordinátáját adja vissza."""
         szabadhelyek = self.egysugarukor(pozicio) & self.szabadcellak
@@ -175,7 +176,7 @@ class Szimulacio:
             return random.choice(list(szabadhelyek))
         return pozicio
 
-    def szaporodas(self, allat):
+    def szaporodas(self, allat: Allat) -> bool:
         """Megpróbál új utódot létrehozni, visszatér azzal, hogy sikerült-e"""
         allatpozicio = allat.pozicio
         faj = allat.faj
@@ -209,13 +210,13 @@ class Szimulacio:
                         return True
         return False
 
-    def novenyevo_mozgas(self, allatpozicio, allatobjektum):
+    def novenyevo_mozgas(self, allatpozicio: tuple[int, int], allatobjektum: Allat) -> None:
         """Átmozgatja a növényevőket szabad helyre, ha van."""
         self.szavanna[allatpozicio[1]][allatpozicio[0]] = "."
         allatobjektum.pozicio = self.allatmozgato(allatpozicio)
         self.szavanna[allatpozicio[1]][allatpozicio[0]] = "N"
 
-    def husevo_mozgas(self, allatpozicio, allatobjektum):
+    def husevo_mozgas(self, allatpozicio: tuple[int, int], allatobjektum: Allat) -> None:
         """A húsevő mellett lévő egyik növényevőt fefalja
         A meghalt állatot kiveszi a set-ből
         Ha nincs növényevő, a közelében, akkor egy random koordinátára
@@ -239,13 +240,13 @@ class Szimulacio:
         self.allatok = self.allatok - eltavolitando
         self.ujszulott_allatok = self.ujszulott_allatok - eltavolitando
 
-    def fuggvenyhivasok(self):
+    def fuggvenyhivasok(self) -> None:
         """Meghívjuk a függvényeket minden év elején"""
         self.szavanna_frissito()
         for i in peldany.szavanna:  # Végig iterál a szavannán
             print(*i)  # Kiírja a szavannát soronként
         input("Nyomj entert")  # A következő év szimulációját érjük el az inputtal
-        os.system("cls")
+        os.system("cls") | os.system("clear")
         self.jatekev_novelo()  # Növeli a játékévet
         print(self.jatekev, "ÉV")  # Kiírja az éppen aktuális játékévet
         self.ujszulott_allatok_kezelese()  # Kezeli az újszülötteket
@@ -268,7 +269,7 @@ print("Szabad cellák száma: ", len(peldany.szabadcellak))
 print("Ragadozók száma: ", len(peldany.ragadozok_cellaja))
 print("Növényevők száma: ", len(peldany.novenyevok_cellaja))
 
-# Simuláció elindítása
+# Szimuláció elindítása
 peldany.fuggvenyhivasok()
 
 for _ in range(100):  # 100 év szimulációja
